@@ -4,6 +4,8 @@ namespace App\Models\Api\v1;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Api\v1\Post;
 
 class Comment extends Model
 {

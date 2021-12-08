@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\Api\v1\Post;
+use App\Models\Api\v1\Comment;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -69,5 +70,10 @@ class User extends Authenticatable implements JWTSubject
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }

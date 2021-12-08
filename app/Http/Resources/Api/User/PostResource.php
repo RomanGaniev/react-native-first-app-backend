@@ -17,28 +17,24 @@ class PostResource extends JsonResource
     {
         $user = auth()->user();
         $like = Like::wherePostId($this->id)->whereUserId($user->id)->first();
-        // if($like) {
-        //     return true;
-        // } else {
-        //     return false;
-        // }
 
         return [
             "id"                => $this->id,
             "data"  => [
                 "text" => $this->data['text'] ? $this->data['text'] : null,
-                "image" => asset( 'storage/' . $this->data['image'] )
+                "image" => $this->data['image'] ? asset( 'storage/' . $this->data['image'] ) : null
             ],
             "created_at"        => $this->created_at,
             "author"            => [
-                "first_name"    => $this->publisher ? $this->publisher->first_name : null,
-                "last_name"     => $this->publisher ? $this->publisher->last_name : null,
-                "avatar"        => $this->publisher ? asset( 'storage/' . $this->publisher->avatar )  : null
+                "first_name"        => $this->publisher ? $this->publisher->first_name : null,
+                "last_name"         => $this->publisher ? $this->publisher->last_name : null,
+                "avatar"            => $this->publisher ? asset( 'storage/' . $this->publisher->avatar )  : null
             ],
             "likes_count"       => $this->likes->count(),
-            "liked"             => $like ? true : false,
+            "liked"             => (bool) $like,
             "comments_count"    => $this->comments->count(),
             // "reposts"           => $this->reposts
+            "views"             => $this->views
         ];
     }
 }

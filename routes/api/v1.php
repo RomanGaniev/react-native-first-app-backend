@@ -25,6 +25,8 @@ Route::prefix('user')
         Route::get('posts/{post}', 'PostController@showOne');
         Route::post('send_image', 'PostController@sendImage');
         Route::get('get_image', 'PostController@getImage');
+        Route::get('posts/{post}/comments', 'PostController@getComments');
+        Route::post('posts/add_comment', 'PostController@addComment');
     }
 );
 
