@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1\Auth;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\User\UserInfoResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Hash;
@@ -63,9 +64,6 @@ class AuthController extends Controller
             $uuid . '.' . $avatar->extension(),
             'public'
         );
-
-        // $avatarPath = 'avatars/' . $uuid . "." . $avatar->getClientOriginalExtension();
-        // Storage::put($avatarPath, file_get_contents($avatar));
         $user->avatar = $avatarPath;
 
         $user->save();
@@ -80,7 +78,9 @@ class AuthController extends Controller
      */
     public function me()
     {
-        return response()->json(auth()->user());
+        $user = auth()->user();
+        return new UserInfoResource($user);
+        // return response()->json(auth()->user());
     }
 
     /**

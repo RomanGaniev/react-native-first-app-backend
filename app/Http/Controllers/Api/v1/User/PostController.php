@@ -10,8 +10,6 @@ use App\Models\Api\v1\Comment;
 use Illuminate\Http\Request;
 use App\Models\Api\v1\Post;
 use App\Models\Api\v1\Like;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -42,14 +40,13 @@ class PostController extends Controller
             );
 
         }
-        $post = new Post;
-        $post->user_id = $user->id;
-        $post->data = [
-            'text' => $text,
-            'image' => $imagePath ?? null
-        ];
-        $post->save();
-
+        Post::create([
+            'user_id' => $user->id,
+            'data' => [
+                'text' => $text,
+                'image' => $imagePath ?? null
+            ]
+        ]);
     }
 
     public function showOne(Request $request, Post $post)
@@ -66,17 +63,15 @@ class PostController extends Controller
 
         $like = Like::wherePostId($post->id)->whereUserId($user->id)->first();
         if (!$like) {
-            $like = new Like;
-            $like->post_id = $post->id;
-            $like->user_id = $user->id;
-            $like->save();
-
+            Like::create([
+                'post_id' => $post->id,
+                'user_id' => $user->id,
+            ]);
             broadcast(new PostChanged($post->id))->toOthers();
 
             return 'Добавлен лайк';
         } else {
             $like->delete();
-
             broadcast(new PostChanged($post->id))->toOthers();
 
             return 'Лайк убран';
@@ -118,11 +113,10 @@ class PostController extends Controller
 
         $user = auth()->user();
 
-        $comment = new Comment();
-        $comment->title = $title;
-        $comment->post_id = $post_id;
-        $comment->user_id = $user->id;
-
-        $comment->save();
+        Comment::create([
+            'title' => $title,
+            'post_id' => $post_id,
+            'user_id' => $user->id,
+        ]);
     }
 }

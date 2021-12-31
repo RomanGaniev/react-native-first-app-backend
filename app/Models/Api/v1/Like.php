@@ -14,15 +14,15 @@ class Like extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id',
-        'post_id'
+        'post_id',
+        'user_id'
     ];
 
     public function user() {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
     public function post() {
-        return $this->belongsTo(Post::class, 'post_id');
+        return $this->belongsTo(Post::class);
     }
 
 }

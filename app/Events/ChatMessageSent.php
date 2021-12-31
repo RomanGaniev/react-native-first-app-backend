@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Api\v1\Post;
+use App\Models\Api\v1\Chat\ChatMessage;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,24 +10,23 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-
 use Illuminate\Broadcasting\InteractsWithBroadcasting;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class PostChanged implements ShouldBroadcast
+class ChatMessageSent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     use InteractsWithBroadcasting;
 
-    public $post_id;
+    public $chat_message_id;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($post_id)
+    public function __construct($chat_message_id)
     {
-        $this->post_id = $post_id;
+        $this->chat_message_id = $chat_message_id;
     }
 
     /**
@@ -37,6 +36,6 @@ class PostChanged implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('post-channel', $this->post_id);
+        return new PresenceChannel('chat.'.ChatMessage::find($this->chat_message_id)->chat->id);
     }
 }
