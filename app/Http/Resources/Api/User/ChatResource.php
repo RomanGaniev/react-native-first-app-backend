@@ -17,6 +17,7 @@ class ChatResource extends JsonResource
         return [
             "id"                    => $this->id,
             "name"                  => $this->name,
+            "avatar"                => $this->avatar ? asset( 'storage/' . $this->avatar ) : null,
             "is_private"            => $this->is_private,
             "latest_message"        => $this->latestMessage,
             "participants_count"    => $this->users->count(),

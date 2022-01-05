@@ -78,28 +78,6 @@ class PostController extends Controller
         }
     }
 
-    public function sendImage(Request $request) {
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filePath = $file->storeAs(
-                'test_images',
-                date('YmdHis') . '.' . $file->extension(),
-                'public'
-            );
-
-            return $filePath;
-
-        } else {
-            return 'нет файла';
-        }
-    }
-
-    public function getImage(Request $request) {
-        $file = asset( 'storage/' . 'test_images/20211106174223.png' );
-        
-        return $file;
-    }
-
     public function getComments(Request $request, Post $post) {
         $comments = Comment::wherePostId($post->id)->get();
         

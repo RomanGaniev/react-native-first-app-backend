@@ -110,16 +110,16 @@ class User extends Authenticatable implements JWTSubject
 	protected function friendsOfThisUser()
 	{
 		return $this->belongsToMany(User::class, 'friendships', 'first_user', 'second_user')
-		->withPivot('status')
-		->wherePivot('status', 'confirmed');
+		            ->withPivot('status', 'acted_user')
+		            ->wherePivotIn('status', ['pending', 'confirmed', 'blocked']);
 	}
 
 	// friendship that this user was asked for
 	protected function thisUserFriendOf()
 	{
 		return $this->belongsToMany(User::class, 'friendships', 'second_user', 'first_user')
-		->withPivot('status')
-		->wherePivot('status', 'confirmed');
+		            ->withPivot('status', 'acted_user')
+		            ->wherePivotIn('status', ['pending', 'confirmed', 'blocked']);
 	}
 
 	// accessor allowing you call $user->friends
@@ -131,23 +131,21 @@ class User extends Authenticatable implements JWTSubject
 
 	protected function loadFriends()
 	{
-		if ( ! array_key_exists('friends', $this->relations))
-		{
-		$friends = $this->mergeFriends();
-		$this->setRelation('friends', $friends);
-	}
+		if ( ! array_key_exists('friends', $this->relations)) {
+            $friends = $this->mergeFriends();
+            $this->setRelation('friends', $friends);
+	    }
 	}
 
 	protected function mergeFriends()
 	{
-		if($temp = $this->friendsOfThisUser)
-		return $temp->merge($this->thisUserFriendOf);
-		else
-		return $this->thisUserFriendOf;
+		if($temp = $this->friendsOfThisUser) {
+            return $temp->merge($this->thisUserFriendOf);
+        } else {
+            return $this->thisUserFriendOf;
+        }
 	}
     //======================== end functions to get friends attribute =========================
-
-
 
     //====================== functions to get blocked_friends attribute ============================
 
@@ -178,8 +176,7 @@ class User extends Authenticatable implements JWTSubject
 
 	protected function loadBlockedFriends()
 	{
-		if ( ! array_key_exists('blocked_friends', $this->relations))
-		{
+		if ( ! array_key_exists('blocked_friends', $this->relations)) {
 			$friends = $this->mergeBlockedFriends();
 			$this->setRelation('blocked_friends', $friends);
 		}
@@ -187,10 +184,11 @@ class User extends Authenticatable implements JWTSubject
 
 	protected function mergeBlockedFriends()
 	{
-		if($temp = $this->friendsOfThisUserBlocked)
+		if($temp = $this->friendsOfThisUserBlocked) {
 			return $temp->merge($this->thisUserFriendOfBlocked);
-		else
+        } else {
 			return $this->thisUserFriendOfBlocked;
+        }
 	}
     // ======================================= end functions to get block_friends attribute =========
 

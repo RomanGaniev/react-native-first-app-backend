@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 // use App\Models\Api\v1\Comment;
 
-class UserInfoResource extends JsonResource
+class FriendRequestResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,12 +17,11 @@ class UserInfoResource extends JsonResource
     {
         return [
             "id"                => $this->id,
-            "uuid"              => $this->uuid,
-            "first_name"        => $this->first_name,
-            "last_name"         => $this->last_name,
-            "email"             => $this->email,
-            "avatar"            => asset( 'storage/' . $this->avatar ),
-            "photos"            => $this->photos
+            "user"              => new UserInfoResource($this->firstUser),
+            "status"            => $this->status,
+
+            "created_at"        => $this->created_at,
+            "updated_at"        => $this->updated_at,
         ];
     }
 }

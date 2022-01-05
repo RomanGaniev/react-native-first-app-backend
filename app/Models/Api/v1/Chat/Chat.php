@@ -30,4 +30,9 @@ class Chat extends Model
     {
         return $this->hasOne(ChatMessage::class)->latestOfMany();
     }
+
+    public function detachAllUsers()
+    {
+        $this->users()->detach();
+    }
 }
