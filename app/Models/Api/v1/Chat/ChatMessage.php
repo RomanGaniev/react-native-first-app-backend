@@ -14,7 +14,14 @@ class ChatMessage extends Model
     protected $fillable = [
         'text',
         'chat_id',
-        'user_id'
+        'user_id',
+        'read',
+        'system'
+    ];
+
+    protected $casts = [
+        'read'  => 'boolean',
+        'system'  => 'boolean',
     ];
 
     public function chat() 

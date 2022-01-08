@@ -9,16 +9,25 @@ use App\Models\Api\v1\Chat\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Api\v1\Chat\ChatMessage;
+use App\Events\ChatsUpdated;
 
 class ChatController extends Controller
 {
     public function show(Request $request)
     {
+        // User::find(2)->chats->sortByDesc('latestMessage.created_at')
+
         $user = auth()->user();
 
-        $chats = $user->chats;
+        $chats = $user->chats->sortByDesc('latestMessage.created_at');
 
         return ChatResource::collection($chats);
+    }
+
+    public function showOne(Request $request, Chat $chat)
+    {
+        return new ChatResource($chat);
     }
 
     public function createPrivate(Request $request, $interlocutorId)
@@ -48,6 +57,8 @@ class ChatController extends Controller
             ]);
     
             $chat->users()->attach([$user->id, $interlocutorId]);
+
+            broadcast(new ChatsUpdated());
     
             return new ChatResource($chat);
         }
@@ -78,6 +89,15 @@ class ChatController extends Controller
         $chat->save();
 
         $chat->users()->attach([$user->id, ...$friends]);
+
+        ChatMessage::create([
+            'user_id' => $user->id,
+            'chat_id' => $chat->id,
+            'text' => 'created_general_chat',
+            'system' => true
+        ]);
+
+        broadcast(new ChatsUpdated());
 
         return new ChatResource($chat);
     }
@@ -111,12 +131,15 @@ class ChatController extends Controller
         $chat->detachAllUsers();
         $chat->users()->attach([$user->id, ...$friends]);
 
-        // return new ChatResource($chat);
+        broadcast(new ChatsUpdated());
+
+        return new ChatResource($chat);
     }
 
     public function deleteGeneral(Request $request, $chatId)
     {
         Chat::find($chatId)->delete();
+        broadcast(new ChatsUpdated());
     }
 
     public function showParticipants(Chat $chat)

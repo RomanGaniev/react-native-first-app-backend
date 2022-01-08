@@ -31,6 +31,11 @@ class Chat extends Model
         return $this->hasOne(ChatMessage::class)->latestOfMany();
     }
 
+    public function unreadMessages()
+    {
+        return $this->hasMany(ChatMessage::class)->where('read', false);
+    }
+
     public function detachAllUsers()
     {
         $this->users()->detach();

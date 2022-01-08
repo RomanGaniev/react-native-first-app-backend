@@ -34,9 +34,6 @@ Broadcast::channel('chat.{chatId}', function ($user, $chatId) {
 //     }
 // });
 
-Broadcast::channel('post-channel', function ($user) {
-    return true;
-});
-// Broadcast::channel('post-channel', function ($user, $id) {
-//     return (int) $user->id === (int) $id;
+// Broadcast::channel('post-channel', function ($user) {
+//     return true;
 // });

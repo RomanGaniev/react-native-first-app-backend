@@ -25,14 +25,18 @@ Route::prefix('user')
         Route::get('posts/{post}/comments', 'PostController@getComments');
         Route::post('posts/add_comment', 'PostController@addComment');
 
-        Route::get('chats', 'ChatController@show');
+        Route::get('chats/', 'ChatController@show');
+        Route::get('chats/{chat}', 'ChatController@showOne');
         Route::post('chats/{interlocutorId}/create_private', 'ChatController@createPrivate');
         Route::post('chats/create_general', 'ChatController@createGeneral');
         Route::post('chats/edit_general', 'ChatController@editGeneral');
         Route::post('chats/{chatId}/delete_general', 'ChatController@deleteGeneral');
         Route::get('chats/{chat}/messages', 'ChatMessageController@show');
+
+        Route::post('chats/{chat}/messages/read_all', 'ChatMessageController@readAllMessagesWhenLeavingChat');
+        
         Route::post('chats/send_message', 'ChatMessageController@send');
-        Route::get('chats/{chat_message}', 'ChatMessageController@showOne');
+        Route::get('chats/messages/{chat_message}', 'ChatMessageController@showOne');
 
         Route::get('chats/{chat}/participants', 'ChatController@showParticipants');
 

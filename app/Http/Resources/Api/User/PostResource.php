@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\User;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Api\v1\Like;
+use Carbon\Carbon;
 
 class PostResource extends JsonResource
 {
@@ -18,13 +19,15 @@ class PostResource extends JsonResource
         $user = auth()->user();
         $like = Like::wherePostId($this->id)->whereUserId($user->id)->first();
 
+        $createdAt = new Carbon($this->created_at);
+
         return [
             "id"                => $this->id,
             "data"  => [
                 "text" => $this->data['text'] ? $this->data['text'] : null,
                 "image" => $this->data['image'] ? asset( 'storage/' . $this->data['image'] ) : null
             ],
-            "created_at"        => $this->created_at,
+            "created_at"        => $createdAt->fromNow(),
             "author"            => [
                 "first_name"        => $this->publisher ? $this->publisher->first_name : null,
                 "last_name"         => $this->publisher ? $this->publisher->last_name : null,
@@ -33,7 +36,6 @@ class PostResource extends JsonResource
             "likes_count"       => $this->likes->count(),
             "liked"             => (bool) $like,
             "comments_count"    => $this->comments->count(),
-            // "reposts"           => $this->reposts
             "views"             => $this->views
         ];
     }

@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1\User;
 
-use App\Events\PostChanged;
+use App\Events\AddedNewPost;
+use App\Events\PostLiked;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\User\PostCommentResource;
 use App\Http\Resources\Api\User\PostResource;
@@ -10,6 +11,7 @@ use App\Models\Api\v1\Comment;
 use Illuminate\Http\Request;
 use App\Models\Api\v1\Post;
 use App\Models\Api\v1\Like;
+use Carbon\Carbon;
 
 class PostController extends Controller
 {
@@ -20,7 +22,7 @@ class PostController extends Controller
 
     public function show(Request $request)
     {
-        $posts = Post::all();
+        $posts = Post::orderBy('created_at', 'desc')->get();
 
         return PostResource::collection($posts);
     }
@@ -40,13 +42,17 @@ class PostController extends Controller
             );
 
         }
-        Post::create([
+        $post = Post::create([
             'user_id' => $user->id,
             'data' => [
                 'text' => $text,
                 'image' => $imagePath ?? null
             ]
         ]);
+
+        broadcast(new AddedNewPost($post->id));
+
+        return new PostResource($post);
     }
 
     public function showOne(Request $request, Post $post)
@@ -67,19 +73,21 @@ class PostController extends Controller
                 'post_id' => $post->id,
                 'user_id' => $user->id,
             ]);
-            broadcast(new PostChanged($post->id))->toOthers();
+            broadcast(new PostLiked($post->id))->toOthers();
 
             return 'Добавлен лайк';
         } else {
             $like->delete();
-            broadcast(new PostChanged($post->id))->toOthers();
+            broadcast(new PostLiked($post->id))->toOthers();
 
             return 'Лайк убран';
         }
     }
 
     public function getComments(Request $request, Post $post) {
-        $comments = Comment::wherePostId($post->id)->get();
+        $comments = Comment::wherePostId($post->id)
+                            ->orderBy('created_at', 'desc')
+                            ->get();
         
         return PostCommentResource::collection($comments);
     }

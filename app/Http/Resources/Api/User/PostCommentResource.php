@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\User;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Api\v1\Comment;
+use Carbon\Carbon;
 
 class PostCommentResource extends JsonResource
 {
@@ -15,13 +16,12 @@ class PostCommentResource extends JsonResource
      */
     public function toArray($request)
     {
-        // $user = auth()->user();
-        // $like = Like::wherePostId($this->id)->whereUserId($user->id)->first();
+        $createdAt = new Carbon($this->created_at);
 
         return [
             "id"                => $this->id,
             "title"             => $this->title ?? null,
-            "created_at"        => $this->created_at,
+            "created_at"        => $createdAt->fromNow(),
             "commentator"       => [
                 "first_name"    => $this->user ? $this->user->first_name : null,
                 "last_name"     => $this->user ? $this->user->last_name : null,
