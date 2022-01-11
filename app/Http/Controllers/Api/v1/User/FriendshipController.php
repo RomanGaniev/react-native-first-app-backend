@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class FriendshipController extends Controller
 {
-    public function show(Request $request)
+    public function getFriends(Request $request)
     {
         $user = auth()->user();
 
@@ -20,7 +20,17 @@ class FriendshipController extends Controller
         return UserProfileResource::collection($friends);
     }
 
-    public function showRequests(Request $request)
+    public function deleteFriend(Request $request, $friend_id)
+    {
+        $user = auth()->user();
+
+        $friendship = $user->friends->find($friend_id)->pivot;
+        $friendship->delete();
+
+        return response()->json(['message' => 'Пользователь с id = ' . $friend_id . ' удален из друзей']);
+    }
+
+    public function getRequests(Request $request)
     {
         $user = auth()->user();
 
@@ -29,13 +39,14 @@ class FriendshipController extends Controller
         return FriendRequestResource::collection($requests);
     }
 
-    public function sendFriendRequest(Request $request, $otherUserId)
+    public function createRequest(Request $request)
     {
         $user = auth()->user();
+        $user_id = $request->get('user_id');
 
         Friendship::create([
             'first_user' => $user->id,
-            'second_user' => $otherUserId,
+            'second_user' => $user_id,
             'acted_user' => $user->id,
             'status' => 'pending'
         ]);
@@ -43,11 +54,11 @@ class FriendshipController extends Controller
         return response()->json(['message' => 'Запрос на дружбу отправлен']);
     }
 
-    public function acceptFriendRequest(Request $request, $otherUserId)
+    public function acceptRequest(Request $request, $user_id)
     {
         $user = auth()->user();
 
-        $friendship = $user->friend_requests->where('first_user', $otherUserId)->first();
+        $friendship = $user->friend_requests->where('first_user', $user_id)->first();
 
         $friendship->acted_user = $user->id;
         $friendship->status = 'confirmed';
@@ -56,25 +67,14 @@ class FriendshipController extends Controller
         return response()->json(['message' => 'Запрос на дружбу принят']);
     }
 
-    public function rejectOrCancelFriendRequest(Request $request, $otherUserId)
+    public function deleteRequest(Request $request, $user_id)
     {
         $user = auth()->user();
 
-        $friendship = $user->friend_requests->where('first_user', $otherUserId)->first();
+        $friendship = $user->friend_requests->where('first_user', $user_id)->first();
 
         $friendship->delete();
 
         return response()->json(['message' => 'Запрос на дружбу отклонен/Заявка отменена']);
     }
-
-    public function remove(Request $request, $otherUserId)
-    {
-        $user = auth()->user();
-
-        $friendship = $user->friends->find($otherUserId)->pivot;
-        $friendship->delete();
-
-        return response()->json(['message' => 'Пользователь с id = ' . $otherUserId . ' удален из друзей']);
-    }
-
 }

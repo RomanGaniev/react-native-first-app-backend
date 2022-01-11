@@ -20,11 +20,19 @@ class PostController extends Controller
         // $this->middleware('auth');
     }
 
-    public function show(Request $request)
+    public function getPosts(Request $request)
     {
         $posts = Post::orderBy('created_at', 'desc')->get();
 
         return PostResource::collection($posts);
+    }
+
+    public function detailt(Request $request, Post $post)
+    {
+        $post->views = $post->views + 1;
+        $post->save();
+
+        return new PostResource($post);
     }
 
     public function create(Request $request)
@@ -55,54 +63,47 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
-    public function showOne(Request $request, Post $post)
-    {
-        $post->views = $post->views + 1;
-        $post->save();
 
-        return new PostResource($post);
-    }
+    // public function like(Request $request, Post $post)
+    // {
+    //     $user = auth()->user();
 
-    public function like(Request $request, Post $post)
-    {
-        $user = auth()->user();
+    //     $like = Like::wherePostId($post->id)->whereUserId($user->id)->first();
+    //     if (!$like) {
+    //         Like::create([
+    //             'post_id' => $post->id,
+    //             'user_id' => $user->id,
+    //         ]);
+    //         broadcast(new PostLiked($post->id))->toOthers();
 
-        $like = Like::wherePostId($post->id)->whereUserId($user->id)->first();
-        if (!$like) {
-            Like::create([
-                'post_id' => $post->id,
-                'user_id' => $user->id,
-            ]);
-            broadcast(new PostLiked($post->id))->toOthers();
+    //         return 'Добавлен лайк';
+    //     } else {
+    //         $like->delete();
+    //         broadcast(new PostLiked($post->id))->toOthers();
 
-            return 'Добавлен лайк';
-        } else {
-            $like->delete();
-            broadcast(new PostLiked($post->id))->toOthers();
+    //         return 'Лайк убран';
+    //     }
+    // }
 
-            return 'Лайк убран';
-        }
-    }
-
-    public function getComments(Request $request, Post $post) {
-        $comments = Comment::wherePostId($post->id)
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+    // public function getComments(Request $request, Post $post) {
+    //     $comments = Comment::wherePostId($post->id)
+    //                         ->orderBy('created_at', 'desc')
+    //                         ->get();
         
-        return PostCommentResource::collection($comments);
-    }
+    //     return PostCommentResource::collection($comments);
+    // }
 
-    public function addComment(Request $request)
-    {
-        $post_id = $request->get('postId');
-        $title = $request->get('comment');
+    // public function addComment(Request $request)
+    // {
+    //     $post_id = $request->get('postId');
+    //     $title = $request->get('comment');
 
-        $user = auth()->user();
+    //     $user = auth()->user();
 
-        Comment::create([
-            'title' => $title,
-            'post_id' => $post_id,
-            'user_id' => $user->id,
-        ]);
-    }
+    //     Comment::create([
+    //         'title' => $title,
+    //         'post_id' => $post_id,
+    //         'user_id' => $user->id,
+    //     ]);
+    // }
 }

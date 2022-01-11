@@ -13,7 +13,7 @@ use App\Events\ChatMessageSent;
 
 class ChatMessageController extends Controller
 {
-    public function show(Chat $chat)
+    public function getMessages(Chat $chat)
     {
         $this->readAllMessages($chat);
 
@@ -23,24 +23,24 @@ class ChatMessageController extends Controller
         return ChatMessageResource::collection($messages);
     }
 
-    public function showOne(Request $request, ChatMessage $chat_message)
+    public function detailt(Request $request, Chat $chat, ChatMessage $chat_message)
     {
+        // $chat->messages->find()
         return new ChatMessageResource($chat_message);
     }
 
-    public function send(Request $request)
+    public function create(Request $request, Chat $chat)
     {
         $user = auth()->user();
-        $chat_id = $request->get('chat_id');
         $text = $request->get('text');
 
         $chat_message = ChatMessage::create([
+            'chat_id' => $chat->id,
             'user_id' => $user->id,
-            'chat_id' => $chat_id,
             'text' => $text
         ]);
 
-        broadcast(new ChatMessageSent($chat_id, $chat_message->id))->toOthers();
+        broadcast(new ChatMessageSent($chat->id, $chat_message->id))->toOthers();
         broadcast(new ChatsUpdated());
 
         return 'Сообщение "' . $text . '" отправлено';

@@ -18,35 +18,44 @@ Route::prefix('user')
     ->middleware('auth:api')
     ->namespace('User')
     ->group(function () {
-        Route::post('post/create', 'PostController@create');
-        Route::post('posts/{post}/like', 'PostController@like');
-        Route::get('posts', 'PostController@show');
-        Route::get('posts/{post}', 'PostController@showOne');
-        Route::get('posts/{post}/comments', 'PostController@getComments');
-        Route::post('posts/add_comment', 'PostController@addComment');
+        Route::prefix('posts')->group(function () {
+            Route::get('/', 'PostController@getPosts');
+            Route::get('/{post}', 'PostController@detailt');
+            Route::post('/', 'PostController@create');
 
-        Route::get('chats/', 'ChatController@show');
-        Route::get('chats/{chat}', 'ChatController@showOne');
-        Route::post('chats/{interlocutorId}/create_private', 'ChatController@createPrivate');
-        Route::post('chats/create_general', 'ChatController@createGeneral');
-        Route::post('chats/edit_general', 'ChatController@editGeneral');
-        Route::post('chats/{chatId}/delete_general', 'ChatController@deleteGeneral');
-        Route::get('chats/{chat}/messages', 'ChatMessageController@show');
+            Route::get('/{post}/comments', 'PostCommentController@getComments');
+            Route::post('/{post}/comments', 'PostCommentController@create');
+            Route::post('/{post}/likes', 'PostLikeController@toggleLike');
+        });
 
-        Route::post('chats/{chat}/messages/read_all', 'ChatMessageController@readAllMessagesWhenLeavingChat');
-        
-        Route::post('chats/send_message', 'ChatMessageController@send');
-        Route::get('chats/messages/{chat_message}', 'ChatMessageController@showOne');
+        Route::prefix('chats')->group(function () {
+            Route::get('/', 'ChatController@getChats');
+            Route::get('/{chat}', 'ChatController@detailt');
+            Route::post('/', 'ChatController@createGroup');
+            Route::post('/{interlocutor_id}', 'ChatController@createPrivate');
+            Route::put('/{chat}', 'ChatController@edit');
+            Route::delete('/{chat}', 'ChatController@delete');
 
-        Route::get('chats/{chat}/participants', 'ChatController@showParticipants');
+            Route::get('/{chat}/messages', 'ChatMessageController@getMessages');
+            Route::get('/{chat}/messages/{chat_message}', 'ChatMessageController@detailt');
+            Route::post('/{chat}/messages', 'ChatMessageController@create');
+            Route::get('/{chat}/participants', 'ChatController@getParticipants');
 
-        Route::get('friends', 'FriendshipController@show');
-        Route::get('friends/requests', 'FriendshipController@showRequests');
-        Route::post('friends/{otherUserId}/send_request', 'FriendshipController@sendFriendRequest');
-        Route::post('friends/{otherUserId}/accept_request', 'FriendshipController@acceptFriendRequest');
-        Route::post('friends/{otherUserId}/reject_or_cancel_request', 'FriendshipController@rejectOrCancelFriendRequest');
-        Route::post('friends/{otherUserId}/remove', 'FriendshipController@remove');
+            // TODO: переделать
+            Route::put('/{chat}/messages', 'ChatMessageController@readAllMessagesWhenLeavingChat');
+        });
 
+        Route::prefix('friendship')->group(function () {
+            Route::get('/friends', 'FriendshipController@getFriends');
+            Route::delete('/friends/{friend_id}', 'FriendshipController@deleteFriend');
+
+            Route::get('/requests', 'FriendshipController@getRequests');
+            Route::post('/requests', 'FriendshipController@createRequest');
+            Route::put('/requests/{user_id}', 'FriendshipController@acceptRequest');
+            Route::delete('/requests/{user_id}', 'FriendshipController@deleteRequest');
+        });
+
+        // TODO: переделать
         Route::get('search/users', 'UserController@show');
     }
 );
