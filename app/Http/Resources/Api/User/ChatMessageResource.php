@@ -17,7 +17,14 @@ class ChatMessageResource extends JsonResource
     {
         return [
             "_id"               => $this->id,
-            "text"              => $this->system ? $this->showSystemMessage() : $this->text,
+            "text"              => $this->system 
+                                        ? 
+                                            ( 
+                                                $this->user_id === auth()->user()->id 
+                                                    ? 'Вы создали беседу '
+                                                    : 'Вас добавили в беседу'
+                                            )
+                                        : $this->text,
             "createdAt"         => $this->created_at,
             "chat_id"           => $this->chat_id,
             "user"              => [
@@ -28,13 +35,5 @@ class ChatMessageResource extends JsonResource
             "read"              => $this->read,
             "system"            => $this->system
         ];
-    }
-
-    public function showSystemMessage() {
-        if ($this->user_id === auth()->user()->id) {
-            return 'Вы создали беседу';
-        } else {
-            return 'Вас добавили в беседу';
-        }
     }
 }

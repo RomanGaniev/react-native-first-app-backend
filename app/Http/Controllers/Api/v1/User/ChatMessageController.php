@@ -15,17 +15,20 @@ class ChatMessageController extends Controller
 {
     public function getMessages(Chat $chat)
     {
-        $this->readAllMessages($chat);
+        $user = auth()->user();
 
-        $messages = $chat->messages;
+        $chat->readAllMessagesForUser($user);
 
         broadcast(new ChatsUpdated());
-        return ChatMessageResource::collection($messages);
+
+        return ChatMessageResource::collection($chat->messages);
     }
 
     public function detailt(Request $request, Chat $chat, ChatMessage $chat_message)
     {
         // $chat->messages->find()
+        $chat_message->read();
+
         return new ChatMessageResource($chat_message);
     }
 
@@ -44,25 +47,5 @@ class ChatMessageController extends Controller
         broadcast(new ChatsUpdated());
 
         return 'Сообщение "' . $text . '" отправлено';
-    }
-
-    public function readAllMessages(Chat $chat)
-    {
-        $user = auth()->user(); //
-
-        $messages = $chat->messages;
-        foreach($messages as $message) {
-            if ($message->user_id !== $user->id) {
-                $message->read = true;
-                $message->save();
-            }
-        }
-    }
-
-    public function readAllMessagesWhenLeavingChat(Chat $chat)
-    {
-        $this->readAllMessages($chat);
-
-        broadcast(new ChatsUpdated());
     }
 }

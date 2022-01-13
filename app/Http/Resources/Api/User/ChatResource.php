@@ -17,21 +17,25 @@ class ChatResource extends JsonResource
         return [
             "id"                    => $this->id,
             "name"                  => $this->name,
-            "avatar"                => $this->avatar ? asset( 'storage/' . $this->avatar ) : null,
-            "is_private"            => $this->is_private,
+            "avatar"                => $this->avatar
+                                            ?
+                                                asset('storage/' . $this->avatar)
+                                            :
+                                                null,
             "latest_message"        => new ChatMessageResource($this->latestMessage),
-            "count_unread_messages" => $this->unreadMessages->count(),
+            "is_private"            => $this->is_private,
+            "interlocutor"          => $this->is_private
+                                            ?
+                                                new UserInfoResource(
+                                                    $this->users
+                                                        ->except(auth()->user()->id)
+                                                        ->first()
+                                                )
+                                            :
+                                                null,
             "participants_count"    => $this->users->count(),
-            "interlocutor"          => $this->is_private ? new UserInfoResource($this->users->where('id', '!=', auth()->user()->id)->first()) : null,
+            "unread_messages_count" => $this->unreadMessages->count(),
             "created_at"            => $this->created_at
         ];
     }
-
-    // public function showSystemMessage() {
-    //     if ($this->latestMessage->user_id === auth()->user()->id) {
-    //         return 'Вы создали беседу';
-    //     } else {
-    //         return 'Вы добавлены в беседу';
-    //     }
-    // }
 }

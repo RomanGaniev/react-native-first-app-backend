@@ -33,4 +33,9 @@ class ChatMessage extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function read() 
+    {
+        $this->update(['read' => true]);
+    }
 }

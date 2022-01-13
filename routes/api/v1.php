@@ -40,9 +40,6 @@ Route::prefix('user')
             Route::get('/{chat}/messages/{chat_message}', 'ChatMessageController@detailt');
             Route::post('/{chat}/messages', 'ChatMessageController@create');
             Route::get('/{chat}/participants', 'ChatController@getParticipants');
-
-            // TODO: переделать
-            Route::put('/{chat}/messages', 'ChatMessageController@readAllMessagesWhenLeavingChat');
         });
 
         Route::prefix('friendship')->group(function () {

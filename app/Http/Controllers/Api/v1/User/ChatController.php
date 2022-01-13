@@ -17,8 +17,6 @@ class ChatController extends Controller
 {
     public function getChats(Request $request)
     {
-        // User::find(2)->chats->sortByDesc('latestMessage.created_at')
-
         $user = auth()->user();
 
         $chats = $user->chats->sortByDesc('latestMessage.created_at');

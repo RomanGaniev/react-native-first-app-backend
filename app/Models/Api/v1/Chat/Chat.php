@@ -40,4 +40,12 @@ class Chat extends Model
     {
         $this->users()->detach();
     }
+
+    public function readAllMessagesForUser(User $user)
+    {
+        $this->messages()
+            ->where('user_id', '<>', $user->id)
+            ->whereRead(false)
+            ->update(['read' => true]);
+    }
 }
