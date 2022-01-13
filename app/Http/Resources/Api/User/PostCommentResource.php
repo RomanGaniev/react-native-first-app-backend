@@ -25,7 +25,7 @@ class PostCommentResource extends JsonResource
             "commentator"       => [
                 "first_name"    => $this->user ? $this->user->first_name : null,
                 "last_name"     => $this->user ? $this->user->last_name : null,
-                "avatar"        => $this->user ? asset( 'storage/' . $this->user->avatar )  : null
+                "avatar"        => $this->user ? asset('storage/' . $this->user->avatar)  : null
             ]
         ];
     }

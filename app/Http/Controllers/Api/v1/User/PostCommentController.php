@@ -25,9 +25,9 @@ class PostCommentController extends Controller
         $user = auth()->user();
 
         Comment::create([
-            'title' => $title,
-            'post_id' => $post->id,
-            'user_id' => $user->id,
+            'title'     => $title,
+            'post_id'   => $post->id,
+            'user_id'   => $user->id,
         ]);
     }
 }

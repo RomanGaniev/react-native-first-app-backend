@@ -23,9 +23,9 @@ Route::prefix('user')
             Route::get('/{post}', 'PostController@detailt');
             Route::post('/', 'PostController@create');
 
+            Route::post('/{post}/toggle_like', 'PostController@toggleLike');
             Route::get('/{post}/comments', 'PostCommentController@getComments');
             Route::post('/{post}/comments', 'PostCommentController@create');
-            Route::post('/{post}/likes', 'PostLikeController@toggleLike');
         });
 
         Route::prefix('chats')->group(function () {

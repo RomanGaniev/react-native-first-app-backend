@@ -20,8 +20,7 @@ class FriendRequestResource extends JsonResource
             "user"              => new UserInfoResource($this->firstUser),
             "status"            => $this->status,
 
-            "created_at"        => $this->created_at,
-            "updated_at"        => $this->updated_at,
+            "created_at"        => $this->created_at
         ];
     }
 }

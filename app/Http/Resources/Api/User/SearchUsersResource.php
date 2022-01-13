@@ -21,10 +21,16 @@ class SearchUsersResource extends JsonResource
             "first_name"        => $this->first_name,
             "last_name"         => $this->last_name,
             "email"             => $this->email,
-            "avatar"            => asset( 'storage/' . $this->avatar ),
+            "avatar"            => asset('storage/' . $this->avatar),
 
-            "friendship"        => $this->friends->only([auth()->user()->id])->first() ? $this->friends->only([auth()->user()->id])->first()->pivot : null,
-            // "friendship"        => $this->pivot,
+            // TODO: переделать
+            "friendship"        => $this->friends
+                                        ->only([auth()->user()->id])
+                                        ->first()
+                                            ?
+                                                $this->friends->only([auth()->user()->id])->first()->pivot
+                                            :
+                                                null,
         ];
     }
 }

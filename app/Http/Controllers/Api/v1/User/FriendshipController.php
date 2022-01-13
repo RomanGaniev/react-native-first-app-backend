@@ -7,6 +7,7 @@ use App\Http\Resources\Api\User\FriendRequestResource;
 use App\Http\Resources\Api\User\UserProfileResource;
 use App\Http\Resources\Api\User\SearchUsersResource;
 use App\Models\Friendship;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FriendshipController extends Controller
@@ -15,7 +16,8 @@ class FriendshipController extends Controller
     {
         $user = auth()->user();
 
-        $friends = $user->friends->where('pivot.status', 'confirmed');
+        $friends = $user->friends
+                        ->where('pivot.status', 'confirmed');
 
         return UserProfileResource::collection($friends);
     }
@@ -24,10 +26,10 @@ class FriendshipController extends Controller
     {
         $user = auth()->user();
 
-        $friendship = $user->friends->find($friend_id)->pivot;
-        $friendship->delete();
-
-        return response()->json(['message' => 'Пользователь с id = ' . $friend_id . ' удален из друзей']);
+        $user->friends
+                ->find($friend_id)
+                ->pivot
+                ->delete();
     }
 
     public function getRequests(Request $request)
@@ -50,31 +52,29 @@ class FriendshipController extends Controller
             'acted_user' => $user->id,
             'status' => 'pending'
         ]);
-
-        return response()->json(['message' => 'Запрос на дружбу отправлен']);
     }
 
     public function acceptRequest(Request $request, $user_id)
     {
         $user = auth()->user();
 
-        $friendship = $user->friend_requests->where('first_user', $user_id)->first();
+        $friendship = $user->friend_requests
+                            ->where('first_user', $user_id)
+                            ->first();
 
-        $friendship->acted_user = $user->id;
-        $friendship->status = 'confirmed';
-        $friendship->save();
+        $friendship->update([
+            'acted_user' => $user->id,
+            'status'     => 'confirmed'
+        ]);
 
-        return response()->json(['message' => 'Запрос на дружбу принят']);
     }
 
     public function deleteRequest(Request $request, $user_id)
     {
         $user = auth()->user();
 
-        $friendship = $user->friend_requests->where('first_user', $user_id)->first();
-
-        $friendship->delete();
-
-        return response()->json(['message' => 'Запрос на дружбу отклонен/Заявка отменена']);
+        $user->friend_requests->where('first_user', $user_id)
+                            ->first()
+                            ->delete();
     }
 }

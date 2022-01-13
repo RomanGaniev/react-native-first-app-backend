@@ -30,7 +30,7 @@ class ChatMessageResource extends JsonResource
             "user"              => [
                 "_id"       => $this->user->id,
                 "name"      => $this->user->first_name . ' ' . $this->user->last_name,
-                "avatar"    => $this->user ? asset( 'storage/' . $this->user->avatar )  : null
+                "avatar"    => $this->user ? asset('storage/' . $this->user->avatar)  : null
             ],
             "read"              => $this->read,
             "system"            => $this->system
