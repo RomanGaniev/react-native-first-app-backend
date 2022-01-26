@@ -69,6 +69,11 @@ class FriendshipController extends Controller
 
     }
 
+    /**
+     * @param Request $request
+     * @param $user_id
+     * @return void
+     */
     public function deleteRequest(Request $request, $user_id)
     {
         $user = auth()->user();

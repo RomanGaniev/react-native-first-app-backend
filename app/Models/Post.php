@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Models\Api\v1;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\User;
-use App\Models\Api\v1\Like;
-use App\Models\Api\v1\Comment;
+use App\Models\Comment;
 
 class Post extends Model
 {
@@ -32,7 +31,7 @@ class Post extends Model
 		return $this->belongsToMany(User::class, 'likes', 'post_id', 'user_id');
 	}
 
-    public function comments() 
+    public function comments()
     {
         return $this->hasMany(Comment::class);
     }
@@ -43,6 +42,6 @@ class Post extends Model
             $this->likes()->detach($user->id)
         :
             $this->likes()->attach($user->id);
-        
+
     }
 }

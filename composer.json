@@ -14,9 +14,11 @@
         "laravel/telescope": "^4.6",
         "laravel/tinker": "^2.5",
         "pusher/pusher-php-server": "~3.0",
-        "tymon/jwt-auth": "^1.0"
+        "tymon/jwt-auth": "^1.0",
+      "ext-json": "*"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.12",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",

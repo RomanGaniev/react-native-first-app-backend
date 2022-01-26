@@ -2,65 +2,130 @@
 
 namespace App\Http\Controllers\Api\v1\User;
 
-use App\Events\AddedNewPost;
-use App\Events\PostLiked;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\User\PostResource;
+use App\Models\Post;
+use App\Services\Post\PostService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\Api\v1\Post;
+use Exception;
 
 class PostController extends Controller
 {
-    public function getPosts(Request $request)
-    {
-        $posts = Post::orderBy('created_at', 'desc')->get();
+    private $postService;
 
-        return PostResource::collection($posts);
+    public function __construct(PostService $postService)
+    {
+        $this->postService = $postService;
     }
 
-    public function detailt(Request $request, Post $post)
+    /**
+     * Display a listing of the resource.
+     *
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        $post->views = $post->views + 1;
-        $post->save();
+        $result = ['status' => 200];
 
-        return new PostResource($post);
-    }
-
-    public function create(Request $request)
-    {
-        $text       = $request->get('text');
-        $image      = $request->file('image');
-
-        $user = auth()->user();
-
-        if ($image) {
-            $imagePath = $image->storeAs(
-                'posts_images',
-                date('YmdHis') . '.' . $image->extension(),
-                'public'
-            );
-
+        try {
+            $result['data'] = $this->postService->getAll();
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
         }
-        $post = Post::create([
-            'user_id' => $user->id,
-            'data' => [
-                'text' => $text,
-                'image' => $imagePath ?? null
-            ]
+
+        return response()->json($result, $result['status']);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = $request->only([
+            'text',
+            'image',
         ]);
 
-        broadcast(new AddedNewPost($post->id));
+        $result = ['status' => 200];
 
-        return new PostResource($post);
+        try {
+            $result['data'] = $this->postService->storePost($data);
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+
+        return response()->json($result, $result['status']);
     }
 
-
-    public function toggleLike(Request $request, Post $post)
+    /**
+     * Display the specified resource.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function show(int $id): JsonResponse
     {
-        $user = auth()->user();
+        $result = ['status' => 200];
 
-        $post->toggleLike($user);
-        
-        broadcast(new PostLiked($post->id))->toOthers();
+        try {
+            $result['data'] = $this->postService->findPost($id);
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response()->json($result, $result['status']);
+    }
+
+    /**
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function like(Post $post): JsonResponse
+    {
+        $result = ['status' => 200];
+
+        try {
+            $result['data'] = $this->postService->likePost($post);
+        } catch (Exception $e) {
+            $result = [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+        return response()->json($result, $result['status']);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param Post $post
+     * @return void
+     */
+    public function update(Request $request, Post $post)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Post $post
+     * @return void
+     */
+    public function destroy(Post $post)
+    {
+        //
     }
 }

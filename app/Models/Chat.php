@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Api\v1\Chat;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\Api\v1\Chat\ChatMessage;
+use App\Models\ChatMessage;
 
 class Chat extends Model
 {

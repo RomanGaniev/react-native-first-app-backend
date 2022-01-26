@@ -19,13 +19,13 @@ Route::prefix('user')
     ->namespace('User')
     ->group(function () {
         Route::prefix('posts')->group(function () {
-            Route::get('/', 'PostController@getPosts');
-            Route::get('/{post}', 'PostController@detailt');
-            Route::post('/', 'PostController@create');
+            Route::get('/', 'PostController@index');
+            Route::get('/{id}', 'PostController@show');
+            Route::post('/', 'PostController@store');
 
-            Route::post('/{post}/toggle_like', 'PostController@toggleLike');
-            Route::get('/{post}/comments', 'PostCommentController@getComments');
-            Route::post('/{post}/comments', 'PostCommentController@create');
+            Route::post('/{post}/toggle_like', 'PostController@like');
+            Route::get('/{id}/comments', 'CommentController@getByPostId');
+            Route::post('/{id}/comments', 'CommentController@storeByPostId');
         });
 
         Route::prefix('chats')->group(function () {
