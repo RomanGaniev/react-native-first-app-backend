@@ -2,12 +2,12 @@
 
 namespace App\Repositories\Comments;
 
-use App\Http\Resources\Api\User\CommentResource;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 
 interface CommentRepositoryInterface
 {
-    public function getByPostId(int $id): AnonymousResourceCollection;
+    public function getByPostId(int $id): Collection;
 
-    public function createFromArray(array $data): CommentResource;
+    public function createFromArray(array $data): Model;
 }

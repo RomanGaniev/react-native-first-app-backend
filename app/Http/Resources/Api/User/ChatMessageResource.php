@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Api\User;
 
-use App\Models\Api\v1\Chat\Chat;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChatMessageResource extends JsonResource
@@ -17,10 +16,10 @@ class ChatMessageResource extends JsonResource
     {
         return [
             "_id"               => $this->id,
-            "text"              => $this->system 
-                                        ? 
-                                            ( 
-                                                $this->user_id === auth()->user()->id 
+            "text"              => $this->system
+                                        ?
+                                            (
+                                                $this->user_id === auth()->id()
                                                     ? 'Вы создали беседу '
                                                     : 'Вас добавили в беседу'
                                             )

@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Services\Post\Repositories;
+namespace App\Repositories\Friendship;
 
 use App\Models\Post;
-use App\Repositories\Posts\PostCommentsRepositoryInterface;
 
-class EloquentPostCommentsRepository implements PostCommentsRepositoryInterface
+class EloquentFriendshipRepository implements FriendshipRepositoryInterface
 {
     public function find(int $id)
     {

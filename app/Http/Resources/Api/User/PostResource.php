@@ -15,7 +15,7 @@ class PostResource extends JsonResource
      */
     public function toArray($request)
     {
-        $user = auth()->user();
+        $userId = auth()->id();
 
         $createdAt = new Carbon($this->created_at);
 
@@ -32,7 +32,7 @@ class PostResource extends JsonResource
                 "avatar"            => $this->publisher ? asset('storage/' . $this->publisher->avatar)  : null
             ],
             "likes_count"       => $this->likes->count(),
-            "liked"             => $this->likes->contains($user->id),
+            "liked"             => $this->likes->contains($userId),
             "comments_count"    => $this->comments->count(),
             "views"             => $this->views
         ];

@@ -2,35 +2,30 @@
 
 namespace App\Repositories\Comments;
 
-use App\Http\Resources\Api\User\CommentResource;
 use App\Models\Comment;
-use App\Models\Post;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class EloquentCommentRepository implements CommentRepositoryInterface
 {
     /**
-     * Get all posts.
-     *
-     * return
+     * @param int $id
+     * @return Builder[]|Collection
      */
-    public function getByPostId(int $id): AnonymousResourceCollection
+    public function getByPostId(int $id): Collection
     {
-        $postComments = Comment::query()->wherePostId($id)
+        return Comment::query()->where('post_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        return CommentResource::collection($postComments);
     }
 
     /**
      * @param array $data
-     * @return CommentResource
+     * @return Builder|Model
      */
-    public function createFromArray(array $data): CommentResource
+    public function createFromArray(array $data): Model
     {
-        $comment = Comment::query()->create($data);
-
-        return new CommentResource($comment);
+        return Comment::query()->create($data);
     }
 }

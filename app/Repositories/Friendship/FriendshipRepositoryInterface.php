@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Post\Repositories;
+namespace App\Repositories\Friendship;
 
 use App\Models\Post;
 
-interface PostRepositoryInterface
+interface FriendshipRepositoryInterface
 {
     public function find(int $id);
 

@@ -3,156 +3,101 @@
 namespace App\Http\Controllers\Api\v1\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\Api\User\ChatResource;
-use App\Http\Resources\Api\User\UserInfoResource;
-use App\Models\Api\v1\Chat\Chat;
-use App\Models\Api\v1\Chat\ChatMessage;
-use App\Events\ChatsUpdated;
-use App\Models\User;
+use App\Http\Requests\Chat\DestroyChatRequest;
+use App\Http\Requests\Chat\ShowChatRequest;
+use App\Http\Requests\Chat\StoreChatRequest;
+use App\Http\Requests\Chat\UpdateChatRequest;
+use App\Services\Chat\ChatService;
+use Illuminate\Http\JsonResponse;
 
 class ChatController extends Controller
 {
-    public function getChats(Request $request)
+    private $chatService;
+
+    public function __construct(ChatService $chatService)
     {
-        $user = auth()->user();
-
-        $chats = $user->chats->sortByDesc('latestMessage.created_at');
-
-        return ChatResource::collection($chats);
+        $this->chatService = $chatService;
     }
 
-    public function detailt(Chat $chat)
+    /**
+     * Get all chats of user.
+     *
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        return new ChatResource($chat);
+        $chats = $this->chatService->getAll();
+
+        return response()->json($chats, 200);
     }
 
-    public function createGroup(Request $request)
+    /**
+     * Store chat.
+     *
+     * @param StoreChatRequest $request
+     * @return JsonResponse
+     */
+    public function store(StoreChatRequest $request): JsonResponse
     {
-        $user = auth()->user();
-        $avatar = $request->file('avatar');
-        $chatName = $request->get('chatName');
-        $friends = $request->get('friends', []);
+        $data = $request->getFormData();
+        $chat = $this->chatService->storeChat($data);
 
-        $chat = new Chat;
-        $chat->name = $chatName;
-        $chat->is_private = false;
-        if($avatar) {
-            $randomAvatarName = Str::random(10);
-            $avatarPath = $avatar->storeAs(
-                'chat_avatars',
-                $randomAvatarName . '_' . $chatName . '.' . $avatar->extension(),
-                'public'
-            );
-            $chat->avatar = $avatarPath;
-        }
-        $chat->save();
-
-        $chat->users()->attach([$user->id, ...$friends]);
-
-        ChatMessage::create([
-            'user_id' => $user->id,
-            'chat_id' => $chat->id,
-            'text' => 'created_group_chat',
-            'system' => true
-        ]);
-
-        broadcast(new ChatsUpdated());
-
-        return new ChatResource($chat);
+        return response()->json($chat, 201);
     }
 
-    public function createPrivate(Request $request, $interlocutor_id)
+    /**
+     * Find chat.
+     *
+     * @param ShowChatRequest $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function show(ShowChatRequest $request, int $id): JsonResponse
     {
-        $user = auth()->user();
+        $chat = $this->chatService->findChat($id);
 
-        // $chat = Chat::whereIsPrivate(true)
-        //                 ->whereHas('users', function (Builder $query) {
-        //                     $query->
-        //                 })->get();
-
-        // if($chat) {
-        //     return new ChatResource($chat);
-        // } else {
-        //     ...
-        // }
-
-        // TODO: переделать
-        $chatId = null;
-        $chats = Chat::with('users')->whereIsPrivate(true)->get();
-
-        foreach($chats as $chat) {
-            if ($chat->users->contains($user->id) &&
-                $chat->users->contains($interlocutor_id)) {
-                $chatId = $chat->id;
-            }
-        }
-
-        // если чат уже есть, то возвращаем его
-        if($chatId) {
-            return new ChatResource(Chat::find($chatId));
-        } else { // иначе создаем
-            $chat = Chat::create([
-                'is_private' => true
-            ]);
-    
-            $chat->users()->attach([$user->id, $interlocutor_id]);
-
-            ChatMessage::create([
-                'user_id' => $user->id,
-                'chat_id' => $chat->id,
-                'text' => 'created_private_chat',
-                'system' => true
-            ]);
-
-            broadcast(new ChatsUpdated());
-    
-            return new ChatResource($chat);
-        }
+        return response()->json($chat, 200);
     }
 
-    public function edit(Request $request, Chat $chat)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param UpdateChatRequest $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function update(UpdateChatRequest $request, int $id): JsonResponse
     {
-        $user = auth()->user();
-        $chatName = $request->get('chatName');
-        $avatar = $request->file('avatar');
-        $friends = $request->get('friends', []);
+        $data = $request->getFormData();
+        $chat = $this->chatService->updateChat($id, $data);
 
-        $chat->name = $chatName;
-        if($avatar) {
-            $randomAvatarName = Str::random(10);
-            $avatarPath = $avatar->storeAs(
-                'chat_avatars',
-                $randomAvatarName . '_' . $chatName . '.' . $avatar->extension(),
-                'public'
-            );
-            $chat->avatar = $avatarPath;
-        }
-        $chat->save();
-
-        $chat->detachAllUsers();
-        $chat->users()->attach([$user->id, ...$friends]);
-
-        broadcast(new ChatsUpdated());
-
-        return new ChatResource($chat);
+        return response()->json($chat, 200);
     }
 
-    public function delete(Chat $chat)
+    /**
+     * Destroy chat.
+     *
+     * @param DestroyChatRequest $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function destroy(DestroyChatRequest $request, int $id): JsonResponse
     {
-        $chat->delete();
-        broadcast(new ChatsUpdated());
+        $this->chatService->destroyChat($id);
+
+        return response()->json('Chat deleted successfully.', 200);
     }
 
-    public function getParticipants(Chat $chat)
+    /**
+     * Get participants ids of chat.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function getParticipantsIds(int $id): JsonResponse
     {
-        $user = auth()->user();
-        $participantsIds = $chat->users
-                                ->except([$user->id])
-                                ->pluck('id');
-        return $participantsIds;
+        $participantsIds = $this->chatService->getParticipantsIdsByChatId($id);
+
+        return response()->json($participantsIds, 200);
     }
 }

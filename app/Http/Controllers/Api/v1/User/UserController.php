@@ -12,8 +12,8 @@ class UserController extends Controller
 {
     public function show(Request $request)
     {
-        $user = auth()->user();
-        $users = User::where('id', '!=', $user->id)->get();
+        $userId = auth()->id();
+        $users = User::where('id', '!=', $userId)->get();
 
         return SearchUsersResource::collection($users);
     }

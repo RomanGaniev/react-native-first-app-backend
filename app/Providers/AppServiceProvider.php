@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\ChatMessages\ChatMessageRepositoryInterface;
+use App\Repositories\ChatMessages\EloquentChatMessageRepository;
+use App\Repositories\Chats\ChatRepositoryInterface;
+use App\Repositories\Chats\EloquentChatRepository;
 use App\Repositories\Comments\CommentRepositoryInterface;
 use App\Repositories\Comments\EloquentCommentRepository;
 use App\Repositories\Posts\EloquentPostRepository;
@@ -24,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             CommentRepositoryInterface::class,
             EloquentCommentRepository::class
+        );
+        $this->app->bind(
+            ChatRepositoryInterface::class,
+            EloquentChatRepository::class
+        );
+        $this->app->bind(
+            ChatMessageRepositoryInterface::class,
+            EloquentChatMessageRepository::class
         );
     }
 

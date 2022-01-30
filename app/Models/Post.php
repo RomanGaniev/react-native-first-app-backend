@@ -36,12 +36,12 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
-    public function toggleLike(User $user)
+    public function toggleLike(int $userId)
     {
-        $this->likes->contains($user->id) ?
-            $this->likes()->detach($user->id)
+        $this->likes->contains($userId) ?
+            $this->likes()->detach($userId)
         :
-            $this->likes()->attach($user->id);
+            $this->likes()->attach($userId);
 
     }
 }

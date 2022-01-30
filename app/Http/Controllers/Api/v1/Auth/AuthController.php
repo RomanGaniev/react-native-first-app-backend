@@ -59,6 +59,7 @@ class AuthController extends Controller
         $user->email = $email;
         $user->password = Hash::make($password);
 
+        // TODO: добавить миниатюры аватарок для оптимизации.
         $avatarPath = $avatar->storeAs(
             'avatars',
             $uuid . '.' . $avatar->extension(),

@@ -43,13 +43,13 @@ class FriendshipController extends Controller
 
     public function createRequest(Request $request)
     {
-        $user = auth()->user();
+        $userId = auth()->id();
         $user_id = $request->get('user_id');
 
         Friendship::create([
-            'first_user' => $user->id,
+            'first_user' => $userId,
             'second_user' => $user_id,
-            'acted_user' => $user->id,
+            'acted_user' => $userId,
             'status' => 'pending'
         ]);
     }

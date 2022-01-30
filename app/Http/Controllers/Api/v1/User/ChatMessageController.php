@@ -2,50 +2,65 @@
 
 namespace App\Http\Controllers\Api\v1\User;
 
-use App\Events\ChatsUpdated;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\User\ChatMessageResource;
-use App\Models\Api\v1\Chat\Chat;
-use App\Models\Api\v1\Chat\ChatMessage;
+use App\Http\Requests\Chat\Message\IndexMessageRequest;
+use App\Http\Requests\Chat\Message\ShowMessageRequest;
+use App\Http\Requests\Chat\Message\StoreMessageRequest;
+use App\Services\ChatMessage\ChatMessageService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
-use App\Events\ChatMessageSent;
 
 class ChatMessageController extends Controller
 {
-    public function getMessages(Chat $chat)
+    private $chatMessageService;
+
+    public function __construct(ChatMessageService $chatMessageService)
     {
-        $user = auth()->user();
-
-        $chat->readAllMessagesForUser($user);
-
-        broadcast(new ChatsUpdated());
-
-        return ChatMessageResource::collection($chat->messages);
+        $this->chatMessageService = $chatMessageService;
     }
 
-    public function detailt(Request $request, Chat $chat, ChatMessage $chat_message)
+    /**
+     * Get all chat messages by chat id.
+     *
+     * @param IndexMessageRequest $request
+     * @param int $chatId
+     * @return JsonResponse
+     */
+    public function index(IndexMessageRequest $request, int $chatId): JsonResponse
     {
-        // $chat->messages->find()
-        $chat_message->read();
+        $messages = $this->chatMessageService->getAllMessagesByChatId($chatId);
 
-        return new ChatMessageResource($chat_message);
+        return response()->json($messages, 200);
     }
 
-    public function create(Request $request, Chat $chat)
+    /**
+     * Send chat message.
+     *
+     * @param StoreMessageRequest $request
+     * @param int $chatId
+     * @return JsonResponse
+     */
+    public function store(StoreMessageRequest $request, int $chatId): JsonResponse
     {
-        $user = auth()->user();
-        $text = $request->get('text');
+        $data = $request->getFormData();
+        $message = $this->chatMessageService->storeChatMessage($chatId, $data);
 
-        $chat_message = ChatMessage::create([
-            'chat_id' => $chat->id,
-            'user_id' => $user->id,
-            'text' => $text
-        ]);
+        return response()->json($message, 201);
+    }
 
-        broadcast(new ChatMessageSent($chat->id, $chat_message->id))->toOthers();
-        broadcast(new ChatsUpdated());
+    /**
+     * Find chat message.
+     *
+     * @param ShowMessageRequest $request
+     * @param int $chatId
+     * @param int $chatMessageId
+     * @return JsonResponse
+     */
+    public function show(ShowMessageRequest $request, int $chatId, int $chatMessageId): JsonResponse
+    {
+        $message = $this->chatMessageService->findChatMessage($chatId, $chatMessageId);
 
-        return 'Сообщение "' . $text . '" отправлено';
+        return response()->json($message, 200);
     }
 }

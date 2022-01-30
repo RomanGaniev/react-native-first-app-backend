@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Api\User;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-// use App\Models\Api\v1\Comment;
 
 class SearchUsersResource extends JsonResource
 {
@@ -25,10 +24,10 @@ class SearchUsersResource extends JsonResource
 
             // TODO: переделать
             "friendship"        => $this->friends
-                                        ->only([auth()->user()->id])
+                                        ->only([auth()->id()])
                                         ->first()
                                             ?
-                                                $this->friends->only([auth()->user()->id])->first()->pivot
+                                                $this->friends->only([auth()->id()])->first()->pivot
                                             :
                                                 null,
         ];

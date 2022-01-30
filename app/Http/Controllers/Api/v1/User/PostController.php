@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\v1\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Http\Requests\Post\StorePostRequest;
 use App\Services\Post\PostService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Exception;
 
 class PostController extends Controller
 {
@@ -19,113 +17,54 @@ class PostController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Get all posts.
      *
      * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $result = ['status' => 200];
+        $posts = $this->postService->getAll();
 
-        try {
-            $result['data'] = $this->postService->getAll();
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-
-        return response()->json($result, $result['status']);
+        return response()->json($posts, 200);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Publish post.
      *
-     * @param Request $request
+     * @param StorePostRequest $request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(StorePostRequest $request): JsonResponse
     {
-        $data = $request->only([
-            'text',
-            'image',
-        ]);
+        $data = $request->getFormData();
+        $post = $this->postService->storePost($data);
 
-        $result = ['status' => 200];
-
-        try {
-            $result['data'] = $this->postService->storePost($data);
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-
-        return response()->json($result, $result['status']);
+        return response()->json($post, 201);
     }
 
     /**
-     * Display the specified resource.
+     * Find post.
      *
      * @param int $id
      * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
-        $result = ['status' => 200];
+        $post = $this->postService->findPost($id);
 
-        try {
-            $result['data'] = $this->postService->findPost($id);
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-        return response()->json($result, $result['status']);
+        return response()->json($post, 200);
     }
 
     /**
-     * @param Post $post
+     * Like post.
+     *
+     * @param int $id
      * @return JsonResponse
      */
-    public function like(Post $post): JsonResponse
+    public function like(int $id): JsonResponse
     {
-        $result = ['status' => 200];
+        $post = $this->postService->likePost($id);
 
-        try {
-            $result['data'] = $this->postService->likePost($post);
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-        return response()->json($result, $result['status']);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Post $post
-     * @return void
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Post $post
-     * @return void
-     */
-    public function destroy(Post $post)
-    {
-        //
+        return response()->json($post, 200);
     }
 }

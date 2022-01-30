@@ -28,7 +28,7 @@ class ChatResource extends JsonResource
                                             ?
                                                 new UserInfoResource(
                                                     $this->users
-                                                        ->except(auth()->user()->id)
+                                                        ->except(auth()->id())
                                                         ->first()
                                                 )
                                             :

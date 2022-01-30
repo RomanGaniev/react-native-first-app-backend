@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\v1\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Api\v1\Comment;
+use App\Http\Requests\Post\Comment\StoreCommentRequest;
 use App\Services\Comment\CommentService;
-use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -18,39 +16,31 @@ class CommentController extends Controller
         $this->commentService = $commentService;
     }
 
-    public function getByPostId(Request $request, int $id): JsonResponse
+    /**
+     * Get all comments of post.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function getByPostId(int $id): JsonResponse
     {
-        $result = ['status' => 200];
+        $comments = $this->commentService->getByPostId($id);
 
-        try {
-            $result['data'] = $this->commentService->getByPostId($id);
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-
-        return response()->json($result, $result['status']);
+        return response()->json($comments, 200);
     }
 
-    public function storeByPostId(Request $request, $post_id)
+    /**
+     * Add comment to post.
+     *
+     * @param StoreCommentRequest $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function storeByPostId(StoreCommentRequest $request, $id): JsonResponse
     {
-        $data = $request->only([
-            'title',
-        ]);
+        $data = $request->only(['title']);
+        $comment = $this->commentService->storeCommentByPostId($id, $data);
 
-        $result = ['status' => 200];
-
-        try {
-            $result['data'] = $this->commentService->storeCommentByPostId($post_id, $data);
-        } catch (Exception $e) {
-            $result = [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-        }
-
-        return response()->json($result, $result['status']);
+        return response()->json($comment, 201);
     }
 }

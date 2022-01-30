@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\ChatMessage;
 
 class Chat extends Model
 {
@@ -13,6 +11,7 @@ class Chat extends Model
 
     protected $fillable = [
         'name',
+        'avatar',
         'is_private'
     ];
 
@@ -21,7 +20,7 @@ class Chat extends Model
         return $this->belongsToMany(User::class);
     }
 
-    public function messages() 
+    public function messages()
     {
         return $this->hasMany(ChatMessage::class);
     }
@@ -41,10 +40,10 @@ class Chat extends Model
         $this->users()->detach();
     }
 
-    public function readAllMessagesForUser(User $user)
+    public function readAllMessagesForUser(int $userId)
     {
         $this->messages()
-            ->where('user_id', '<>', $user->id)
+            ->where('user_id', '<>', $userId)
             ->whereRead(false)
             ->update(['read' => true]);
     }

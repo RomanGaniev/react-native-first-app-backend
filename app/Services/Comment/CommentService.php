@@ -15,29 +15,33 @@ class CommentService
     }
 
     /**
+     * Get comments by post id.
+     *
      * @param int $id
      * @return AnonymousResourceCollection
      */
     public function getByPostId(int $id): AnonymousResourceCollection
     {
-        return $this->commentRepository->getByPostId($id);
+        $comments = $this->commentRepository->getByPostId($id);
+
+        return CommentResource::collection($comments);
     }
 
     /**
-     * @param int $post_id
+     * Store comment.
+     *
+     * @param int $id
      * @param array $data
      * @return CommentResource
      */
-    public function storeCommentByPostId(int $post_id, array $data): CommentResource
+    public function storeCommentByPostId(int $id, array $data): CommentResource
     {
-        $user_id = auth()->user()->id;
-        $data = [
-            'user_id' => $user_id,
-            'title' => $data['title'],
-            'post_id' => $post_id,
-        ];
+        $userId = auth()->id();
+        $data['post_id'] = $id;
+        $data['user_id'] = $userId;
 
-        return $this->commentRepository->createFromArray($data);
+        $comment = $this->commentRepository->createFromArray($data);
+
+        return new CommentResource($comment);
     }
-
 }

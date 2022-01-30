@@ -3,9 +3,8 @@
 namespace App\Services\Post;
 
 use App\Events\AddedNewPost;
-use App\Http\Resources\Api\User\PostCollection;
+use App\Events\PostLiked;
 use App\Http\Resources\Api\User\PostResource;
-use App\Models\Post;
 use App\Repositories\Posts\PostRepositoryInterface;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -18,11 +17,15 @@ class PostService
     }
 
     /**
+     * Get all posts.
+     *
      * @return AnonymousResourceCollection
      */
     public function getAll(): AnonymousResourceCollection
     {
-        return $this->postRepository->getAll();
+        $posts = $this->postRepository->getAll();
+
+        return PostResource::collection($posts);
     }
 
     /**
@@ -33,58 +36,53 @@ class PostService
      */
     public function findPost(int $id): PostResource
     {
-        return $this->postRepository->find($id);
+        $post = $this->postRepository->find($id);
+
+        return new PostResource($post);
     }
 
     /**
-     * @param Post $post
-     * @return Post
-     */
-    public function likePost(Post $post): Post
-    {
-        $user = auth()->user();
-
-        return $this->postRepository->like($post, $user);
-    }
-
-    /**
+     * Store post.
+     *
      * @param array $data
      * @return PostResource
      */
     public function storePost(array $data): PostResource
     {
-        $user_id = auth()->user()->id;
-
-        if ($data['image']) {
+        // TODO: изолировать сохранение файлов в отдельный класс.
+        if (isset($data['image'])) {
             $imagePath = $data['image']->storeAs(
                 'posts_images',
                 date('YmdHis') . '.' . $data['image']->extension(),
                 'public'
             );
         }
-
-        $data = [
-            'user_id' => $user_id,
+        $array = [
+            'user_id' => auth()->id(),
             'data' => [
-                'text' => $data['text'],
-                'image' => $imagePath ?? null
-            ]
+                'text' => $data['text'] ?? null,
+                'image' => $imagePath ?? null,
+            ],
         ];
 
-        $post = $this->postRepository->createFromArray($data);
-
+        $post = $this->postRepository->createFromArray($array);
         broadcast(new AddedNewPost($post->id));
 
-        return $post;
+        return new PostResource($post);
     }
 
     /**
-     * @param Post $post
-     * @param array $data
-     * @return void
+     * Toggle like post.
+     *
+     * @param int $id
+     * @return PostResource
      */
-    public function updatePost(Post $post, array $data)
+    public function likePost(int $id): PostResource
     {
-        return $this->postRepository->updateFromArray($post, $data);
+        $post = $this->postRepository->find($id);
+        $this->postRepository->like($post, auth()->id());
+        broadcast(new PostLiked($id))->toOthers();
+
+        return new PostResource($post);
     }
 }

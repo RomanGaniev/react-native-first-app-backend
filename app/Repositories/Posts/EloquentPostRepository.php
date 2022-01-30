@@ -5,59 +5,47 @@ namespace App\Repositories\Posts;
 use App\Http\Resources\Api\User\PostResource;
 use App\Models\Post;
 use App\Models\User;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class EloquentPostRepository implements PostRepositoryInterface
 {
     /**
-     * Get all posts.
-     *
-     * return
+     * @return Builder[]|Collection
      */
-    public function getAll(): AnonymousResourceCollection
+    public function getAll(): Collection
     {
-        $posts = Post::query()->orderBy('created_at', 'desc')->get();
-        return PostResource::collection($posts);
+        return Post::query()->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**
-     * Get post by id.
-     *
      * @param int $id
-     * @return PostResource
+     * @return Model
      */
-    public function find(int $id): PostResource
+    public function find(int $id): Model
     {
-        $post = Post::query()->find($id);
-
-        return new PostResource($post);
+        return Post::query()->find($id);
     }
 
     /**
      * @param Post $post
-     * @param User $user
-     * @return Post
+     * @param int $userId
+     * @return void
      */
-    public function like(Post $post, User $user): Post
+    public function like(Model $post, int $userId): void
     {
-        $post->toggleLike($user);
-
-        return $post;
+        $post->toggleLike($userId);
     }
 
     /**
      * @param array $data
-     * @return PostResource
+     * @return Model
      */
-    public function createFromArray(array $data): PostResource
+    public function createFromArray(array $data): Model
     {
-        $post = Post::query()->create($data);
-
-        return new PostResource($post);
-    }
-
-    public function updateFromArray(Post $post, array $data)
-    {
-
+        return Post::query()->create($data);
     }
 }
