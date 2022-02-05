@@ -6,14 +6,20 @@ use App\Events\AddedNewPost;
 use App\Events\PostLiked;
 use App\Http\Resources\Api\User\PostResource;
 use App\Repositories\Posts\PostRepositoryInterface;
+use App\Utils\ImageUploader;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PostService
 {
     private $postRepository;
+    private $imageUploader;
 
-    public function __construct(PostRepositoryInterface $postRepository) {
+    public function __construct(
+        PostRepositoryInterface $postRepository,
+        ImageUploader $imageUploader
+    ) {
         $this->postRepository = $postRepository;
+        $this->imageUploader = $imageUploader;
     }
 
     /**
@@ -49,23 +55,20 @@ class PostService
      */
     public function storePost(array $data): PostResource
     {
-        // TODO: изолировать сохранение файлов в отдельный класс.
         if (isset($data['image'])) {
-            $imagePath = $data['image']->storeAs(
-                'posts_images',
-                date('YmdHis') . '.' . $data['image']->extension(),
-                'public'
-            );
+            $imagePath = $this->imageUploader
+                ->upload('posts_images', $data['image']);
         }
-        $array = [
-            'user_id' => auth()->id(),
-            'data' => [
-                'text' => $data['text'] ?? null,
-                'image' => $imagePath ?? null,
-            ],
-        ];
 
-        $post = $this->postRepository->createFromArray($array);
+        $post = $this->postRepository
+            ->createFromArray([
+                'user_id' => auth()->id(),
+                'data' => [
+                    'text' => $data['text'] ?? null,
+                    'image' => $imagePath ?? null
+                ]
+            ]);
+
         broadcast(new AddedNewPost($post->id));
 
         return new PostResource($post);

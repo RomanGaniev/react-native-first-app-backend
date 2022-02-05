@@ -28,12 +28,4 @@ class StorePostRequest extends BaseFormRequest
             'image' => 'required_without:text|image'
         ];
     }
-
-    public function getFormData(): array
-    {
-        $data = parent::getFormData();
-        $data['image'] = $this->file('image');
-
-        return $data;
-    }
 }

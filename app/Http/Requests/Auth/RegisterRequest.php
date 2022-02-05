@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Chat;
+namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\BaseFormRequest;
 
-class StoreChatRequest extends BaseFormRequest
+class RegisterRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,11 +24,11 @@ class StoreChatRequest extends BaseFormRequest
     public function rules()
     {
         return [
-            'type' => 'required|string',
-            'name' => 'required_without:interlocutor_id|max:25',
-            'avatar' => 'image',
-            'interlocutor_id' => 'integer',
-            'participants' => 'array'
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'avatar' => 'required|image',
         ];
     }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api\v1\Auth;
 
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Utils\ImageUploader;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\User\UserInfoResource;
-use Illuminate\Http\Request;
 use App\Models\User;
 use Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -42,32 +41,19 @@ class AuthController extends Controller
     /**
      * User registration
      */
-    public function registration(Request $request)
-    {
-        $first_name = request('first_name');
-        $last_name = request('last_name');
-        $email = request('email');
-        $password = request('password');
-        $avatar = $request->file('avatar');
-
-        $uuid = Str::uuid();
-
-        $user = new User();
-        $user->uuid = $uuid;
-        $user->first_name = $first_name;
-        $user->last_name = $last_name;
-        $user->email = $email;
-        $user->password = Hash::make($password);
-
+    public function registration(
+        RegisterRequest $request,
+        ImageUploader $imageUploader
+    ) {
         // TODO: добавить миниатюры аватарок для оптимизации.
-        $avatarPath = $avatar->storeAs(
+        $data = $request->getFormData();
+        $data['uuid'] = Str::uuid();
+        $data['avatar'] = $imageUploader->upload(
             'avatars',
-            $uuid . '.' . $avatar->extension(),
-            'public'
+            $data['avatar']
         );
-        $user->avatar = $avatarPath;
 
-        $user->save();
+        User::query()->create($data);
 
         return response()->json(['message' => 'Successfully registration!']);
     }

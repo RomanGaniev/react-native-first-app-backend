@@ -6,6 +6,7 @@ use App\Events\ChatsUpdated;
 use App\Http\Resources\Api\User\ChatResource;
 use App\Repositories\ChatMessages\ChatMessageRepositoryInterface;
 use App\Repositories\Chats\ChatRepositoryInterface;
+use App\Utils\ImageUploader;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
 
@@ -13,14 +14,17 @@ class ChatService
 {
     private $chatRepository;
     private $chatMessageRepository;
+    private $imageUploader;
 
     public function __construct(
         ChatRepositoryInterface $chatRepository,
-        ChatMessageRepositoryInterface $chatMessageRepository
+        ChatMessageRepositoryInterface $chatMessageRepository,
+        ImageUploader $imageUploader
 
     ) {
        $this->chatRepository = $chatRepository;
        $this->chatMessageRepository = $chatMessageRepository;
+       $this->imageUploader = $imageUploader;
     }
 
     /**
@@ -57,20 +61,16 @@ class ChatService
         $userId = auth()->id();
 
         if($data['type'] === 'group') {
-            // TODO: изолировать сохранение файлов в отдельный класс.
             if (isset($data['avatar'])) {
-                $avatarPath = $data['avatar']->storeAs(
-                    'chat_avatars',
-                    $data['name'] . '_' . date('YmdHis') . '.' . $data['avatar']->extension(),
-                    'public'
-                );
+                $avatarPath = $this->imageUploader
+                    ->upload('posts_images', $data['avatar']);
             }
-            $participantsIds = $data['participants'];
             $participantsIds[] = $userId;
+            isset($data['participants']) && $participantsIds = $data['participants'];
             $array = [
                 'is_private' => false,
                 'name' => $data['name'],
-                'avatar' => $avatarPath
+                'avatar' => $avatarPath ?? null,
             ];
             $systemMessage = 'created_group_chat';
         } elseif ($data['type'] === 'private') {
