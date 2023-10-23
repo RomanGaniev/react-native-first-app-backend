@@ -7,7 +7,6 @@ use App\Utils\ImageUploader;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\User\UserInfoResource;
 use App\Models\User;
-use Hash;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -29,6 +28,10 @@ class AuthController extends Controller
      */
     public function login()
     {
+//        $user = User::find(1);
+//        $token = auth()->login($user, true);
+//        return $this->respondWithToken($token);
+
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {

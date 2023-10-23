@@ -6,22 +6,22 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "ext-json": "*",
         "beyondcode/laravel-websockets": "^1.12",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.54",
         "laravel/sanctum": "^2.11",
-        "laravel/telescope": "^4.6",
         "laravel/tinker": "^2.5",
         "pusher/pusher-php-server": "~3.0",
-        "tymon/jwt-auth": "^1.0",
-      "ext-json": "*"
+        "tymon/jwt-auth": "1.0.2"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.12",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
+        "laravel/telescope": "^4.16",
         "mockery/mockery": "^1.4.2",
         "nunomaduro/collision": "^5.0",
         "phpunit/phpunit": "^9.3.3"

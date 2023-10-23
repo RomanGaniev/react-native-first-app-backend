@@ -11,6 +11,7 @@ use App\Repositories\Comments\EloquentCommentRepository;
 use App\Repositories\Posts\EloquentPostRepository;
 use App\Repositories\Posts\PostRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Telescope\TelescopeServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
             ChatMessageRepositoryInterface::class,
             EloquentChatMessageRepository::class
         );
+        if ($this->app->environment('local')) {
+            $this->app->register(TelescopeServiceProvider::class);
+            $this->app->register(TelescopeServiceProvider::class);
+        }
     }
 
     /**
